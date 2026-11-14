@@ -1,24 +1,16 @@
 import { useState } from "react";
 import { CATEGORIES, money } from "../utils/format.js";
 
-export default function BudgetPanel({ budgets, setBudgets, spent, monthText }) {
+export default function BudgetPanel({ budgets, onSet, onRemove, spent, monthText }) {
   const [category, setCategory] = useState(CATEGORIES.expense[0]);
   const [limit, setLimit] = useState("");
 
-  function addBudget(e) {
+  async function addBudget(e) {
     e.preventDefault();
     const value = parseFloat(limit);
     if (!value || value <= 0) return;
-    setBudgets((prev) => ({ ...prev, [category]: value }));
+    await onSet(category, value);
     setLimit("");
-  }
-
-  function removeBudget(name) {
-    setBudgets((prev) => {
-      const copy = { ...prev };
-      delete copy[name];
-      return copy;
-    });
   }
 
   const names = Object.keys(budgets);
@@ -50,7 +42,7 @@ export default function BudgetPanel({ budgets, setBudgets, spent, monthText }) {
               <span className={over ? "over" : ""}>
                 {money(used)} / {money(budgets[name])}
               </span>
-              <button type="button" className="link" onClick={() => removeBudget(name)}>remove</button>
+              <button type="button" className="link" onClick={() => onRemove(name)}>remove</button>
             </div>
             <div className="track">
               <div className={"fill " + (over ? "over" : pct > 80 ? "warn" : "")} style={{ width: pct + "%" }} />
